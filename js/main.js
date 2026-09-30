@@ -9,6 +9,9 @@ const SONG_ARTIST = "spidermine";
    0) SEMBUNYIIN ICON GAMBAR RUSAK KALAU FILE FOTONYA HILANG
    ============================================================ */
 document.querySelectorAll('img').forEach((img) => {
+  // Lewati gambar yang src-nya belum diisi (contoh: #lb-img di lightbox),
+  // kalau tidak dia akan "disembunyikan" selamanya dan fotonya tampak kosong.
+  if (!img.getAttribute('src') || img.id === 'lb-img') return;
   const hide = () => { img.style.visibility = 'hidden'; };
   if (img.complete && img.naturalWidth === 0) {
     hide();
@@ -65,30 +68,33 @@ const FALL_EMOJIS = ['❤️', '🤍', '❤️', '🤍', '🌸', '💮', '🌷',
 
 function spawnWebbits(container, count){
   if(!container) return;
+  const frag = document.createDocumentFragment();
   for(let i = 0; i < count; i++){
     const el = document.createElement('div');
     el.className = 'webbit is-emoji';
     el.textContent = FALL_EMOJIS[Math.floor(Math.random() * FALL_EMOJIS.length)];
     el.setAttribute('aria-hidden', 'true');
 
-    const size = 16 + Math.random() * 16; // 16–32px
-    const left = Math.random() * 100;
-    const fallDuration = 11 + Math.random() * 12;
-    const swayDuration  = 3 + Math.random() * 3;
-    const delay = Math.random() * 16;
+    const size   = 14 + Math.random() * 16;          // 14–30px
+    const dur    = 14 + Math.random() * 14;          // 14–28s, pelan & halus
+    const sway   = 14 + Math.random() * 26;          // simpangan kiri-kanan (px)
+    const spin   = (Math.random() < .5 ? -1 : 1) * (10 + Math.random() * 22);
+    const depth  = Math.random();                    // dekat = besar & jelas, jauh = kecil & samar
 
-    el.style.fontSize = size + 'px';
-    el.style.left   = left + 'vw';
-    el.style.opacity = (0.55 + Math.random() * 0.35).toFixed(2);
-    el.style.animationDuration = `${fallDuration}s, ${swayDuration}s`;
-    el.style.animationDelay = `${delay}s, ${delay}s`;
-
-    container.appendChild(el);
+    el.style.setProperty('--x', (Math.random() * 100).toFixed(1) + 'vw');
+    el.style.setProperty('--sway', sway.toFixed(0) + 'px');
+    el.style.setProperty('--spin', spin.toFixed(0) + 'deg');
+    el.style.setProperty('--o', (0.25 + depth * 0.5).toFixed(2));
+    el.style.fontSize = (size * (0.75 + depth * 0.5)).toFixed(1) + 'px';
+    el.style.animationDuration = dur.toFixed(1) + 's';
+    el.style.animationDelay = (-Math.random() * dur).toFixed(1) + 's'; // mulai sudah tersebar, tidak menumpuk di atas
+    frag.appendChild(el);
   }
+  container.appendChild(frag);
 }
 
-spawnWebbits(document.getElementById('webbits-container'), window.innerWidth < 600 ? 14 : 22);
-spawnWebbits(document.getElementById('webbits-intro'), window.innerWidth < 600 ? 16 : 26);
+spawnWebbits(document.getElementById('webbits-container'), window.innerWidth < 600 ? 12 : 20);
+spawnWebbits(document.getElementById('webbits-intro'), window.innerWidth < 600 ? 12 : 20);
 
 /* ============================================================
    1.5) CLICK / TAP WEB SPLAT — small web-hit mark wherever the
@@ -297,8 +303,19 @@ if(window.matchMedia('(hover: hover) and (pointer: fine)').matches){
 
   function show(i){
     idx = (i + cards.length) % cards.length;
-    big.src = cards[idx].querySelector('img').src;
+    const src = cards[idx].querySelector('img').currentSrc || cards[idx].querySelector('img').src;
+    big.style.visibility = 'visible';
+    big.classList.add('is-loading');
+    big.onload  = () => big.classList.remove('is-loading');
+    big.onerror = () => big.classList.remove('is-loading');
+    big.src = src;
+    if(big.complete) big.classList.remove('is-loading');
     count.textContent = `${idx + 1} / ${cards.length}`;
+    // preload tetangga biar geser foto terasa instan
+    [idx + 1, idx - 1].forEach(n => {
+      const im = new Image();
+      im.src = cards[(n + cards.length) % cards.length].querySelector('img').src;
+    });
   }
   function open(i){
     show(i);

@@ -983,3 +983,123 @@ body.intro-done .enter-inner > :nth-child(4){ transition-delay: .7s; }
 
 /* ---- V4: layar "Open" setelah teks kecil dihapus ---- */
 .enter-title{ margin-bottom: 40px; line-height: .95; }
+
+
+/* ==========================================================================
+   V5 — BACKGROUND LEBIH HALUS + RESPONSIF + LIGHTBOX FIX
+   Semua animasi hanya pakai transform/opacity (dijalankan GPU, tidak patah-patah).
+   ========================================================================== */
+
+/* ---- aurora: 3 cahaya besar yang melayang pelan di belakang konten ---- */
+#aurora{
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  contain: strict;
+}
+#aurora i{
+  position: absolute; border-radius: 50%;
+  width: clamp(320px, 62vmax, 820px); aspect-ratio: 1;
+  filter: blur(clamp(50px, 9vmax, 110px));
+  opacity: .55; will-change: transform;
+  animation: aurora-drift 26s ease-in-out infinite alternate;
+}
+#aurora i:nth-child(1){
+  top: -18%; left: -14%;
+  background: radial-gradient(circle, rgba(210,31,44,.55), transparent 68%);
+}
+#aurora i:nth-child(2){
+  bottom: -22%; right: -16%;
+  background: radial-gradient(circle, rgba(51,70,158,.62), transparent 68%);
+  animation-duration: 32s; animation-delay: -9s;
+}
+#aurora i:nth-child(3){
+  top: 34%; left: 38%;
+  width: clamp(240px, 42vmax, 560px);
+  background: radial-gradient(circle, rgba(255,120,150,.22), transparent 68%);
+  animation-duration: 38s; animation-delay: -16s;
+}
+@keyframes aurora-drift{
+  0%  { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(7vw, 6vh, 0) scale(1.12); }
+  100%{ transform: translate3d(-6vw, 11vh, 0) scale(.96); }
+}
+
+/* lapisan dasar dibuat statis & ringan (dulu ada blend-mode yang berat di HP) */
+body::before{
+  background:
+    radial-gradient(circle at 18% 8%, rgba(210,31,44,0.10), transparent 42%),
+    radial-gradient(circle at 86% 78%, rgba(51,70,158,0.12), transparent 46%),
+    radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1.3px);
+  background-size: auto, auto, 15px 15px;
+}
+#grain{ inset: 0; mix-blend-mode: normal; opacity: .035; }
+
+
+/* ---- emoji jatuh: satu keyframe, tanpa margin-left (tidak memicu layout) ---- */
+.webbit.is-emoji{
+  left: var(--x, 50vw); top: 0; margin: 0;
+  opacity: var(--o, .5);
+  animation: petal-fall linear infinite;
+  animation-name: petal-fall;
+  will-change: transform;
+  filter: none;
+  text-shadow: 0 0 10px rgba(255,255,255,.18);
+}
+@keyframes petal-fall{
+  0%  { transform: translate3d(0, -12vh, 0) rotate(0deg); }
+  25% { transform: translate3d(var(--sway, 24px), 26vh, 0) rotate(calc(var(--spin, 16deg) * .5)); }
+  50% { transform: translate3d(calc(var(--sway, 24px) * -0.6), 52vh, 0) rotate(var(--spin, 16deg)); }
+  75% { transform: translate3d(calc(var(--sway, 24px) * .8), 80vh, 0) rotate(calc(var(--spin, 16deg) * 1.4)); }
+  100%{ transform: translate3d(0, 114vh, 0) rotate(calc(var(--spin, 16deg) * 2)); }
+}
+
+/* sudut jaring ikut bernapas pelan */
+.corner-web{ animation: web-breathe 9s ease-in-out infinite alternate; will-change: opacity; }
+@keyframes web-breathe{ from{ opacity: .10; } to{ opacity: .19; } }
+
+/* ---- HP: lebih ringan & pas di layar kecil ---- */
+@media (max-width: 720px){
+  #aurora i{ filter: blur(60px); opacity: .5; }
+  #aurora i:nth-child(3){ display: none; }
+  .corner-web{ animation: none; }
+}
+
+/* ---- layar ultra lebar / tablet landscape ---- */
+@media (min-width: 1400px){
+  #aurora i{ opacity: .6; }
+}
+
+/* ---- gerakan dikurangi: background diam, tetap cantik ---- */
+@media (prefers-reduced-motion: reduce){
+  #aurora i, .webbit, .corner-web{ animation: none !important; }
+  .webbit{ display: none; }
+}
+
+/* ---- galeri: reveal lebih halus (easing + tanpa lompat) ---- */
+.reveal{
+  transform: translate3d(0, 24px, 0);
+  transition: opacity .8s cubic-bezier(.22,.7,.2,1), transform .8s cubic-bezier(.22,.7,.2,1);
+  will-change: opacity, transform;
+}
+.reveal.in-view{ transform: translate3d(0,0,0); will-change: auto; }
+
+/* ---- LIGHTBOX FIX: foto pasti tampil + transisi halus ---- */
+#lightbox{
+  transition: opacity .35s cubic-bezier(.22,.7,.2,1), visibility .35s;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  overscroll-behavior: contain; touch-action: pan-y;
+}
+#lb-img{
+  visibility: visible !important;
+  width: auto; height: auto;
+  max-width: min(94vw, 920px); max-height: 82vh; max-height: 82svh;
+  opacity: 0; transform: scale(.94) translate3d(0,8px,0);
+  transition: opacity .35s ease, transform .4s cubic-bezier(.22,.7,.2,1);
+  user-select: none; -webkit-user-drag: none;
+}
+#lightbox.open #lb-img{ opacity: 1; transform: none; }
+#lightbox.open #lb-img.is-loading{ opacity: .35; }
+.lb-btn{ transition: transform .2s ease, background .2s ease; }
+.lb-btn:active{ transform: scale(.92); }
+@media (max-width: 640px){
+  #lb-img{ max-height: 74vh; max-height: 74svh; }
+}
