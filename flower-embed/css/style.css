@@ -1210,7 +1210,7 @@ body {
 :root{ --dark-color: #0a0a12; color-scheme: dark; }
 html, body{ background: transparent !important; }
 .night{ display: none !important; }
-.flower__grass__overlay{ background-color: rgba(10,10,18,0.35); }
+.flower__grass__overlay{ background-color: transparent; }
 
 
 /* ---- dijeda saat tidak terlihat di layar (dikendalikan halaman utama) ---- */
@@ -1219,4 +1219,9 @@ html.is-paused *, html.is-paused *::before, html.is-paused *::after{
 }
 .flowers, .flower, .flower__leafs, .flower__light, .flower__g-long, .flower__g-right, .flower__g-front, .grow-ans{
   backface-visibility: hidden;
+}
+
+/* restart: hentikan semua animasi sesaat lalu nyalakan lagi -> mekar dari awal */
+html.is-reset *, html.is-reset *::before, html.is-reset *::after{
+  animation: none !important;
 }

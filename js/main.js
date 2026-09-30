@@ -360,38 +360,39 @@ if(window.matchMedia('(hover: hover) and (pointer: fine)').matches){
 
 
 /* ============================================================
-   7) BUNGA — jalan hanya saat terlihat di layar.
-      Di luar layar, animasi bunga dijeda; saat bunga tampil,
-      hiasan background (aurora & emoji) diredam. Hasilnya tidak ngelag.
+   7) BUNGA — mekar ULANG tiap kali di-scroll ke sini.
+      - Masuk layar (>=35% terlihat)  -> animasi mulai dari awal
+      - Keluar layar total            -> dijeda (hemat baterai), siap mekar lagi
    ============================================================ */
-(function initFlowerPerf(){
-  const stage  = document.getElementById('flowerStage');
+(function initFlowerBloom(){
+  const stage = document.getElementById('flowerStage');
   if(!stage) return;
-  const frame  = stage.querySelector('iframe');
-  let visible  = false;
+  const frame = stage.querySelector('iframe');
+  let state = 'idle';                       // idle | playing | away
 
-  function send(){
-    try{ frame.contentWindow.postMessage({ flower: visible ? 'play' : 'pause' }, '*'); }catch(_){}
-  }
-  function set(v){
-    visible = v;
-    document.body.classList.toggle('flower-active', v);
-    send();
+  function send(cmd){
+    try{ frame.contentWindow.postMessage({ flower: cmd }, '*'); }catch(_){}
   }
 
-  frame.addEventListener('load', send);   // iframe baru selesai load -> kirim status terkini
+  frame.addEventListener('load', () => { if(state === 'playing') send('restart'); });
 
   if('IntersectionObserver' in window){
     new IntersectionObserver((entries) => {
-      set(entries[entries.length - 1].isIntersecting);
-    }, { threshold: 0.05 }).observe(stage);
+      const e = entries[entries.length - 1];
+      if(e.intersectionRatio >= 0.35 && state !== 'playing'){
+        state = 'playing';
+        send('restart');
+      } else if(!e.isIntersecting && state === 'playing'){
+        state = 'away';
+        send('pause');
+      }
+    }, { threshold: [0, 0.05, 0.2, 0.35, 0.5] }).observe(stage);
   } else {
-    set(true);
+    state = 'playing'; send('restart');
   }
 
-  // tab disembunyikan -> jeda juga
   document.addEventListener('visibilitychange', () => {
-    if(document.hidden) frame.contentWindow && frame.contentWindow.postMessage({ flower: 'pause' }, '*');
-    else send();
+    if(document.hidden) send('pause');
+    else if(state === 'playing') send('play');
   });
 })();

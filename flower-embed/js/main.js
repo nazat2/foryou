@@ -9,10 +9,22 @@ onload = () => {
   }, 500);
 };
 
-/* Halaman utama mengirim "play"/"pause" — animasi hanya jalan saat bunga terlihat,
-   jadi tidak membebani HP/laptop ketika user sedang di bagian lain. */
+/* Halaman utama mengirim perintah:
+     "restart" -> bunga mekar lagi dari awal (tiap kali di-scroll ke sini)
+     "play"    -> lanjut (mis. kembali dari tab lain)
+     "pause"   -> jeda (di luar layar, hemat baterai) */
 addEventListener("message", (e) => {
   const d = e.data;
   if (!d || typeof d.flower !== "string") return;
-  document.documentElement.classList.toggle("is-paused", d.flower === "pause");
+  const root = document.documentElement;
+
+  if (d.flower === "pause") {
+    root.classList.add("is-paused");
+  } else if (d.flower === "play") {
+    root.classList.remove("is-paused");
+  } else if (d.flower === "restart") {
+    root.classList.add("is-reset");
+    void root.offsetWidth;                 // paksa browser menghitung ulang -> animasi di-reset
+    root.classList.remove("is-reset", "is-paused");
+  }
 });
