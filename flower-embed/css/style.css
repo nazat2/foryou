@@ -40,7 +40,6 @@ body {
   transform: translateX(-50%);
   width: 100%;
   height: 100%;
-  filter: blur(0.1vmin);
   background-image: radial-gradient(ellipse at top, transparent 0%, var(--dark-color)), radial-gradient(ellipse at bottom, var(--dark-color), rgba(145, 233, 255, 0.2)), repeating-linear-gradient(220deg, rgb(0, 0, 0) 0px, rgb(0, 0, 0) 19px, transparent 19px, transparent 22px), repeating-linear-gradient(189deg, rgb(0, 0, 0) 0px, rgb(0, 0, 0) 19px, transparent 19px, transparent 22px), repeating-linear-gradient(148deg, rgb(0, 0, 0) 0px, rgb(0, 0, 0) 19px, transparent 19px, transparent 22px), linear-gradient(90deg, rgb(255, 255, 250), rgb(240, 240, 240));
 }
 
@@ -165,11 +164,10 @@ body {
   position: absolute;
   left: 0;
   top: 0;
-  transform: translate(-50%, -100%);
-  width: 8vmin;
-  height: 8vmin;
-  background-color: #fff;
-  filter: blur(10vmin);
+  transform: translate(-50%, -78%);
+  width: 30vmin;
+  height: 30vmin;
+  background: radial-gradient(circle closest-side, rgba(255,255,255,.28), rgba(255,255,255,.10) 55%, transparent 100%);
 }
 
 .flower__leaf {
@@ -301,7 +299,6 @@ body {
   height: 1vmin;
   background-color: rgb(255, 251, 0);
   border-radius: 50%;
-  filter: blur(0.2vmin);
   animation: light-ans 4s linear infinite backwards;
 }
 
@@ -530,7 +527,6 @@ body {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.6);
-  filter: blur(1.5vmin);
   z-index: 100;
 }
 
@@ -609,7 +605,6 @@ body {
 
 .flower__g-right--2 .leaf {
   height: 75vmin;
-  filter: blur(0.3vmin);
   opacity: 0.8;
 }
 
@@ -978,7 +973,6 @@ body {
   left: 0vmin;
   bottom: -20vmin;
   z-index: 100;
-  filter: blur(0.3vmin);
   transform: scale(0.8) rotate(2deg);
 }
 
@@ -986,7 +980,6 @@ body {
   left: 35vmin;
   bottom: 20vmin;
   z-index: -1;
-  filter: blur(0.3vmin);
   transform: scale(0.6) rotate(2deg);
   opacity: 0.7;
 }
@@ -1097,18 +1090,15 @@ body {
   50% {
     opacity: 1;
     transform: translateY(-15vmin) translateX(2vmin);
-    filter: blur(0.2vmin);
   }
 
   75% {
     transform: translateY(-20vmin) translateX(-2vmin);
-    filter: blur(0.2vmin);
   }
 
   100% {
     transform: translateY(-30vmin);
     opacity: 0;
-    filter: blur(1vmin);
   }
 }
 
@@ -1221,3 +1211,12 @@ body {
 html, body{ background: transparent !important; }
 .night{ display: none !important; }
 .flower__grass__overlay{ background-color: rgba(10,10,18,0.35); }
+
+
+/* ---- dijeda saat tidak terlihat di layar (dikendalikan halaman utama) ---- */
+html.is-paused *, html.is-paused *::before, html.is-paused *::after{
+  animation-play-state: paused !important;
+}
+.flowers, .flower, .flower__leafs, .flower__light, .flower__g-long, .flower__g-right, .flower__g-front, .grow-ans{
+  backface-visibility: hidden;
+}

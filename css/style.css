@@ -941,10 +941,18 @@ h2{ font-size: clamp(2.1rem, 5.5vw, 3.2rem); letter-spacing: .005em; }
 .flower-stage{
   width: min(100%, 560px);
   background: transparent; border: 0; border-radius: 0; box-shadow: none;
-  overflow: visible;
-  -webkit-mask-image: radial-gradient(ellipse 70% 66% at 50% 50%, #000 58%, transparent 100%);
-          mask-image: radial-gradient(ellipse 70% 66% at 50% 50%, #000 58%, transparent 100%);
+  overflow: hidden;
+  contain: layout paint;
 }
+.flower-stage::after{
+  content: ""; position: absolute; inset: -1px; pointer-events: none;
+  background:
+    linear-gradient(to bottom, var(--ink) 0, transparent 16%, transparent 84%, var(--ink) 100%),
+    radial-gradient(ellipse 74% 70% at 50% 50%, transparent 54%, var(--ink) 100%);
+}
+/* glow merah di belakang bunga dibuat samar supaya tepi bunga menyatu tanpa garis */
+#mawar::before{ opacity: .14; }
+body.flower-active #aurora{ opacity: .15; }
 .flower-stage iframe{ background: transparent; color-scheme: dark; }
 @media (max-width: 560px){
   .flower-stage{ border-radius: 0; width: 112%; margin-left: -6%; }
@@ -998,7 +1006,6 @@ body.intro-done .enter-inner > :nth-child(4){ transition-delay: .7s; }
 #aurora i{
   position: absolute; border-radius: 50%;
   width: clamp(320px, 62vmax, 820px); aspect-ratio: 1;
-  filter: blur(clamp(50px, 9vmax, 110px));
   opacity: .55; will-change: transform;
   animation: aurora-drift 26s ease-in-out infinite alternate;
 }
@@ -1042,7 +1049,6 @@ body::before{
   animation-name: petal-fall;
   will-change: transform;
   filter: none;
-  text-shadow: 0 0 10px rgba(255,255,255,.18);
 }
 @keyframes petal-fall{
   0%  { transform: translate3d(0, -12vh, 0) rotate(0deg); }
@@ -1053,14 +1059,11 @@ body::before{
 }
 
 /* sudut jaring ikut bernapas pelan */
-.corner-web{ animation: web-breathe 9s ease-in-out infinite alternate; will-change: opacity; }
-@keyframes web-breathe{ from{ opacity: .10; } to{ opacity: .19; } }
 
 /* ---- HP: lebih ringan & pas di layar kecil ---- */
 @media (max-width: 720px){
-  #aurora i{ filter: blur(60px); opacity: .5; }
+  #aurora i{ opacity: .5; }
   #aurora i:nth-child(3){ display: none; }
-  .corner-web{ animation: none; }
 }
 
 /* ---- layar ultra lebar / tablet landscape ---- */
@@ -1103,3 +1106,14 @@ body::before{
 @media (max-width: 640px){
   #lb-img{ max-height: 74vh; max-height: 74svh; }
 }
+
+
+/* ---- saat bunga terlihat: background hiasan diredam supaya animasi bunga mulus ---- */
+#aurora, #webbits-container{ transition: opacity .7s ease; }
+body.flower-active #webbits-container{ opacity: 0; }
+body.flower-active .webbit,
+body.flower-active #aurora i{ animation-play-state: paused; }
+
+/* lapisan warna dasar ikut memudar saat bunga tampil -> tepi bunga menyatu mulus */
+body::before{ transition: opacity .7s ease; }
+body.flower-active::before{ opacity: 0; }

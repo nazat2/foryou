@@ -93,8 +93,8 @@ function spawnWebbits(container, count){
   container.appendChild(frag);
 }
 
-spawnWebbits(document.getElementById('webbits-container'), window.innerWidth < 600 ? 12 : 20);
-spawnWebbits(document.getElementById('webbits-intro'), window.innerWidth < 600 ? 12 : 20);
+spawnWebbits(document.getElementById('webbits-container'), window.innerWidth < 600 ? 9 : 15);
+spawnWebbits(document.getElementById('webbits-intro'), window.innerWidth < 600 ? 9 : 15);
 
 /* ============================================================
    1.5) CLICK / TAP WEB SPLAT — small web-hit mark wherever the
@@ -356,4 +356,42 @@ if(window.matchMedia('(hover: hover) and (pointer: fine)').matches){
     if(Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1));
     startX = null;
   }, { passive: true });
+})();
+
+
+/* ============================================================
+   7) BUNGA — jalan hanya saat terlihat di layar.
+      Di luar layar, animasi bunga dijeda; saat bunga tampil,
+      hiasan background (aurora & emoji) diredam. Hasilnya tidak ngelag.
+   ============================================================ */
+(function initFlowerPerf(){
+  const stage  = document.getElementById('flowerStage');
+  if(!stage) return;
+  const frame  = stage.querySelector('iframe');
+  let visible  = false;
+
+  function send(){
+    try{ frame.contentWindow.postMessage({ flower: visible ? 'play' : 'pause' }, '*'); }catch(_){}
+  }
+  function set(v){
+    visible = v;
+    document.body.classList.toggle('flower-active', v);
+    send();
+  }
+
+  frame.addEventListener('load', send);   // iframe baru selesai load -> kirim status terkini
+
+  if('IntersectionObserver' in window){
+    new IntersectionObserver((entries) => {
+      set(entries[entries.length - 1].isIntersecting);
+    }, { threshold: 0.05 }).observe(stage);
+  } else {
+    set(true);
+  }
+
+  // tab disembunyikan -> jeda juga
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden) frame.contentWindow && frame.contentWindow.postMessage({ flower: 'pause' }, '*');
+    else send();
+  });
 })();
